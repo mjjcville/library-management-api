@@ -32,8 +32,9 @@ end
 RSpec.configure do |config|
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
   config.fixture_paths = [
-    Rails.root.join('spec/fixtures')
+Rails.root.join('spec/fixtures')
   ]
+  config.include Rails.application.routes.url_helpers, type: :requests
 
   # If you're not using ActiveRecord, or you'd prefer not to run each of your
   # examples within a transaction, remove the following line or assign false
@@ -50,9 +51,9 @@ RSpec.configure do |config|
   # You can disable this behaviour by removing the line below, and instead
   # explicitly tag your specs with their type, e.g.:
   #
-  #     RSpec.describe UsersController, type: :controller do
-  #       # ...
-  #     end
+  # RSpec.describe UsersController, type: :controller do
+  #   # ...
+  # end
   #
   # The different available types are documented in the features, such as in
   # https://rspec.info/features/6-0/rspec-rails
