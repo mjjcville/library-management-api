@@ -1,7 +1,7 @@
 class Api::V1::BooksController < ApplicationController
   rescue_from ActionController::ParameterMissing, with: :parameter_missing
   rescue_from ActiveRecord::RecordInvalid, with: :record_invalid
-  rescue_from ActiveRecord::ActiveRecordError, with :general_error
+  rescue_from ActiveRecord::ActiveRecordError, with: :general_error
 
   def index
     formatted_booklist = []

@@ -42,11 +42,13 @@ class Api::V1::BookCopiesController < ApplicationController
   end
 
   def checkin
-    #Find the existing borrower record for this book copy
-    borrower_records = BorrowerRecord.where(book_copy_id: :id, status: "borrowing", borrower_id: checkout_params[:borrower_id] )
+    current_date = DateTime.now
 
+    #Find the existing borrower record for this book copy
+    borrower_records = BorrowerRecord.where(book_copy_id: @book_copy.id, status: "borrowing", borrower_id: @borrower.id )
     if borrower_records.any? && borrower_records.size == 1   #problematic if there are numerous checkouts for one copy 
-      borrower_record.return_date = @current_date
+      borrower_record = borrower_records.first
+      borrower_record.return_date = current_date
       borrower_record.status = "returned"
       @book_copy.status = "available"
       @book_copy.due_date = nil
@@ -57,7 +59,7 @@ class Api::V1::BookCopiesController < ApplicationController
 
       render json: { book_copy_id: :id }, status: :ok
     else
-      render json: { message: "Please see a librarian"}, status: :unprocessable_entity
+      render json: { message: "Please see a librarian. There is a problem with this borrower record."}, status: :unprocessable_entity
     end
   end
 

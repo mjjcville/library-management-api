@@ -51,13 +51,61 @@ describe "Book Copies Request", type: :request do
   end
 
   describe 'PATCH update' do
+    let!(:borrower_record) { create(:borrower_record, checkout_date: DateTime.now - 1.week, book_copy_id: book_copy_1.id, borrower_id: borrower.id) }
+    let!(:valid_checkin_same_library) { {
+        checkout_info: {
+          borrower_id: borrower.id
+      }
+    } }
+    let!(:invalid_checkin) { {
+        checkout_info: {
+      }
+    } }
+    let!(:valid_checkin_different_library) { {
+      checkout_info: {
+        borrower_id: borrower.id,
+        library_id: test_library_2.id
+      }
+    } }
     it 'should update both the borrower record and the book copy to indicate a return' do 
+      original_library_id = book_copy_1.library.id
+      patch "/api/v1/book_copies/#{book_copy_1.id}/checkin", params: valid_checkin_same_library.to_json, headers: { 'Content-Type': 'application/json' }
+      expect(response.status).to eql(200)
+      book_copy_1.reload
+      expect(original_library_id).to eql(book_copy_1.library.id)
+      expect(book_copy_1.status).to eql("available")
+      expect(book_copy_1.due_date).to be_falsey
+      borrower_record.reload
+      expect(borrower_record.status).to eql("returned")
+    end
+
+    it 'should update both the borrower record and the book copy to indicate a return at a different library' do 
+      original_library_id = book_copy_1.library.id
+      patch "/api/v1/book_copies/#{book_copy_1.id}/checkin", params: valid_checkin_different_library.to_json, headers: { 'Content-Type': 'application/json' }
+      expect(response.status).to eql(200)
+      book_copy_1.reload
+      expect(original_library_id).not_to eql(book_copy_1.library.id)
+      expect(book_copy_1.status).to eql("available")
+      expect(book_copy_1.due_date).to be_falsey
+      borrower_record.reload
+      expect(borrower_record.status).to eql("returned")
     end
 
     it 'should fail if the borrower record cannot be found' do
+      patch "/api/v1/book_copies/#{book_copy_1.id}/checkin", params: invalid_checkin.to_json, headers: { 'Content-Type': 'application/json' }
+      expect(response.status).to eql(422)
     end
 
     it 'should fail if the borrower has too many records for the same book' do
+      #creating a second record just for this example
+      borrower_record_2= BorrowerRecord.create!(
+        checkout_date: DateTime.now - 1.day, 
+        book_copy_id: book_copy_1.id, 
+        borrower_id: borrower.id)
+    
+      patch "/api/v1/book_copies/#{book_copy_1.id}/checkin", params: valid_checkin_same_library.to_json, headers: { 'Content-Type': 'application/json' }
+      expect(response.status).to eql(422)
+      borrower_record_2.delete
     end
 
   end
