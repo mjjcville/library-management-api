@@ -7,6 +7,8 @@ yesterday = current_date - 1.day
 next_week = current_date + 1.week
 
 describe "Book Copies Request", type: :request do
+  before { allow_any_instance_of(Api::V1::BookCopiesController).to receive(:authenticate_user!).and_return(true) }
+  
   let!(:test_library_1) { create(:library) }
   let!(:test_library_2) { create(:library) }
   let!(:book_1) { create(:book) }

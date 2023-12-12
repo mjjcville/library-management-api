@@ -34,7 +34,7 @@ end
 
 # User
 FactoryBot.define do
-  factory :user do
+  factory :library_user do
     first_name { "Test" }
     last_name { "User"}
     credit_card_number {"1111-2222-3333-4444"}
@@ -47,7 +47,7 @@ end
 FactoryBot.define do
   factory :borrower do
     join_date { DateTime.now - 1.month}
-    association :user
+    association :library_user
     association :library
   end
 end
