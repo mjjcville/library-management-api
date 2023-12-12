@@ -6,9 +6,9 @@ class CreateBorrowers < ActiveRecord::Migration[7.1]
       t.integer :status, null: false, default: 0
 
       t.references :library, null: false, foreign_key: true
-      t.references :user, null: false, foreign_key: true
+      t.references :library_user, null: false, foreign_key: true
 
-      t.index [:library_id, :user_id], unique: true
+      t.index [:library_id, :library_user_id], unique: true
       
       t.timestamps
     end

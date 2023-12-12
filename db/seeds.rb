@@ -12,6 +12,17 @@ current_date = DateTime.now
 yesterday = current_date - 1.day
 next_week = current_date + 1.week
 
+#Clear all tables to start with a clean slate
+Fee.delete_all
+BorrowerRecord.delete_all
+Borrower.delete_all
+LibraryUser.delete_all
+BookCopy.delete_all
+Book.delete_all
+Author.delete_all
+Library.delete_all
+
+
 #Basic Library set up
 north_library = Library.find_or_create_by!(name: "North Library", description: "Library on the north side of town")
 east_library = Library.find_or_create_by!(name: "East Library", description: "Library on the east side of town")
@@ -35,6 +46,10 @@ book_7 = Book.find_or_create_by!(isbn:"0700000000", title: "The Hobbit", author_
 book_8 = Book.find_or_create_by!(isbn:"0800000000", title: "The Hobbit, audiobook", author_id: author_tolkien.id)
 book_9 = Book.find_or_create_by!(isbn:"0900000000", title: "As you like it", author_id: author_shakespeare.id)
 
+#Borrowers and Library users
+library_user = LibraryUser.create!(first_name: "Lois", last_name: "Librarian", credit_card_number: "9999", credit_card_expiration: "0125", credit_card_security_code: "888")
+library_borrower = Borrower.create!(join_date: current_date - 1.month, library_id: north_library.id, library_user_id: library_user.id)
+
 #Initial copy of books, in specific collections
 BookCopy.find_or_create_by!(status: "available", book_id: book_1.id, library_id: north_library.id )
 BookCopy.find_or_create_by!(status: "available", book_id: book_1.id, library_id: east_library.id )
@@ -46,5 +61,9 @@ BookCopy.find_or_create_by!(status: "available", book_id: book_5.id, library_id:
 BookCopy.find_or_create_by!(status: "available", book_id: book_6.id, library_id: west_library.id )
 
 #Additional copies of books in specific locations
-BookCopy.create!(status: "checked_out", due_date: yesterday, book_id: book_1.id, library_id: north_library.id )
+overdue_copy = BookCopy.create!(status: "checked_out", due_date: yesterday, book_id: book_1.id, library_id: north_library.id )
 BookCopy.create!(status: "checked_out", due_date: next_week, book_id: book_2.id, library_id: north_library.id )
+
+
+#Borrower Records
+BorrowerRecord.create!(checkout_date: current_date - 2.weeks, status: "overdue", borrower_id: library_borrower.id, book_copy_id: overdue_copy.id)

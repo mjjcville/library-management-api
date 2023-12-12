@@ -1,6 +1,6 @@
-class CreateUsers < ActiveRecord::Migration[7.1]
+class CreateLibraryUsers < ActiveRecord::Migration[7.1]
   def up
-    create_table :users, if_not_exists: true do |t|
+    create_table :library_users, if_not_exists: true do |t|
       t.string :first_name, null: false
       t.string :last_name, null: false
       t.string :credit_card_number, null: false 
@@ -13,7 +13,7 @@ class CreateUsers < ActiveRecord::Migration[7.1]
   end
 
   def down
-    drop_table :users, if_exists: true
+    drop_table :library_users, if_exists: true
   end
 
 end
