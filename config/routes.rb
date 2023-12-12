@@ -1,16 +1,16 @@
 Rails.application.routes.draw do
   namespace :api do
-    namespace :v1 do
-      get 'memberships/index'
-      get 'memberships/show'
-      get 'memberships/create'
-      get 'books/index'
-      get 'books/show'
-      get 'books/create'
-      get 'libraries/index'
-      get 'libraries/show'
-      get 'libraries/create'
-    end
+namespace :v1 do
+  resources :libraries, only: [:create]
+  resources :borrowers, only: [:create] 
+  resources :books, only: [:index, :create] 
+  resources :book_copies, only: [] do 
+member do
+  post :checkout
+  patch :checkin
+end
+  end
+end
   end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
