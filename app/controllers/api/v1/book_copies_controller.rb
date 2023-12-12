@@ -35,7 +35,7 @@ class Api::V1::BookCopiesController < ApplicationController
       render json: { error: 'Please see a librarian. The borrower has unpaid fees.' }, status: :unprocessable_entity
       return
     end
-    
+
     #Find any existing borrower record for this book copy
     borrower_records = BorrowerRecord.where(book_copy_id: @book_copy.id, status: "borrowing", borrower_id: @borrower.id )
     
@@ -88,7 +88,7 @@ class Api::V1::BookCopiesController < ApplicationController
   end
 
   def find_book_copy
-    @book_copy = BookCopy.find(params[:id])
+    @book_copy = BookCopy.find(params[:id].to_i)
   end
 
   def find_borrower
