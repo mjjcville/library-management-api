@@ -76,7 +76,7 @@ class Api::V1::BookCopiesController < ApplicationController
       @book_copy.save!
       borrower_record.save!
 
-      render json: { book_copy_id: :id }, status: :ok
+      render json: { book_copy_id: @book_copy.id }, status: :ok
     else
       render json: { message: "Please see a librarian. There is a problem with this borrower record."}, status: :unprocessable_entity
     end

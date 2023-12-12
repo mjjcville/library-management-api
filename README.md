@@ -20,12 +20,14 @@ In the creation of this Library Api, there were a few design decisions and assum
     - Users (librarians) are created and signed in
     - The only exception has to do with Fees.
       - Borrowers ask about and pay fees.  This is slightly different, but becuase a borrower may have fees connected to several late books, it made more sense to make the action come from the Borrower. If it had come from the fee, there would have been added complexity in getting the borrower information (history) and finding other fees associated with that Borrower.
+  - Please note that in some cases ids are passed in the query params.  The designer wavered between further nesting of the routes (thus embedding id's in the path) or just passing necessary ids in the query params.  For the purposes of this MVP, less nesting and less complication of routes was chosen. 
   - Books have only one author. Authors can have many books though. In reality, this is absurd, but in the interest of time the designer opted to implement the many to many relationship between authors and books in a later release. 
   - Book copies are checked out of whatever library they belong to. The borrower must have access to that library. However, a book can be returned to any library in the system, whether the borrower also has a registration there.
   - When a borrower pays their fees, they pay the entirety, not the fee for just one of potentially many books. 
   - Also in the interest of time, the designer opted to move the following to future enhancements:
     - Libraries should have timezones to make the checkout and return information more correct. It is possible to check a book out on the east coast, and return it on the west coast. The timezone of the library would influence the date columns such as due_date, etc..
     - Minor refactoring of the controllers to consolidate the error handling.  Initially, the designer thought each controller would have unique error handling. By the time the api was nearing completion, it became apparent that there were standard operations that could be dried up and moved to application_controller.rb
+    - The credit card information should be handled better. Currently it is just plain text. Obviously encryption and formatting would be preferred.
     - Roles. Currently, the user is created and is authorized for all endpoints. Implementation of the devise gem ended up consuming vast amounts of time, so authentication was achieved but not authorization.  Also there is an incredible weakness in that anyone can create themselves as a user. This is a noted security concern and must be addressed prior to deployment.
     - Pagination and Rate limiting. These absolutely must be handled prior to deployment for get endpoints.
 
@@ -116,11 +118,24 @@ A great place to start though is by creating a new library:
       }
     }
   - Notes: A couple of checks here. The borrower must have registered at the library where the book copy is part of the collection
-  - EXAMPLE: ``````
+  - EXAMPLE: ```curl --location 'localhost:3000/api/v1/book_copies/21/checkout' \
+--header 'Authorization: Bearer {token}' \
+--form 'checkout_info[library_id]="10"' \
+--form 'checkout_info[borrower_id]="3"'```
 
 ##### Checkout a book
-  - Endpoint: /api/v1/book_copies/:id/checkin
-  - Action: POST
+  - Endpoint: /api/v1/book_copies/:id/checkout
+  - Action: PATCH
+  - Params: Params: {
+      checkout_info: {
+        borrower_id: 1,
+        library_id: 1
+      }
+    }
+  - Example: ```curl --location --request PATCH 'localhost:3000/api/v1/book_copies/21/checkin' \
+--header 'Authorization: Bearer {token}' \
+--form 'checkout_info[library_id]="10"' \
+--form 'checkout_info[borrower_id]="3"'```
 
 ## Borrowers endpoint
 ##### Add a new borrower
@@ -164,3 +179,6 @@ A great place to start though is by creating a new library:
 --header 'Authorization: Bearer {token}'```
 
 
+
+#### TESTS
+To run the tests: ```rspec``` and the full suite will run.
