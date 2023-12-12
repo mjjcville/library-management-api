@@ -49,14 +49,18 @@ class Api::V1::BorrowersController < ApplicationController
   def fee_total
     total_fee_amount = 0
     borrower_fees = BorrowerRecord.where(borrower_id: params[:id].to_i).joins(:fees).where("fees.status = 'accruing'")
-    total_fee_amount += borrower_fees.map { |fee| fee.amount}
-
+    borrower_fees.each do |fee| 
+      total_fee_amount += fee.amount
+    end
+    
     render json: { total_fee_amount: total_fee_amount }, status: :ok
   end
 
   def pay
     borrower_fees = BorrowerRecord.where(borrower_id: params[:id].to_i).joins(:fees).where("fees.status = 'accruing'")
-    borrower_fees.update_all(status: "paid")
+    if borrower_fees.any?
+      borrower_fees.update_all(status: "paid")
+    end
     render json: { message: "Borrower has paid"}, status: :ok
   end
 
