@@ -1,4 +1,8 @@
+include Devise::Controllers::Helpers
+
 class Api::V1::BooksController < ApplicationController
+  before_action :authenticate_user!
+  
   rescue_from ActionController::ParameterMissing, with: :parameter_missing
   rescue_from ActiveRecord::RecordInvalid, with: :record_invalid
   rescue_from ActiveRecord::ActiveRecordError, with: :general_error
@@ -6,17 +10,17 @@ class Api::V1::BooksController < ApplicationController
   def index
     formatted_booklist = []
     if book_params[:global_search].present?
-      possible_books = Book.where("title LIKE '%#{book_params[:title]}%'").includes(:book_copy)
+      possible_books = Book.where("title LIKE '%#{book_params[:title]}%'").includes(:book_copies)
       possible_books.each do | book |
-        formatted_booklist << book.book_copy.map { | copy | { title: book.title, library: copy.library.name }}
+        formatted_booklist << book.book_copies.map { | copy | { title: book.title, library: copy.library.name }}
       end
     else
-      possible_books = Book.where("title LIKE '%#{book_params[:title]}%'").joins(:book_copy).where("book_copies.library_id = ?", book_params[:library_id])
+      possible_books = Book.where("title LIKE '%#{book_params[:title]}%'").joins(:book_copies).where("book_copies.library_id = ?", book_params[:library_id])
       possible_books.each do | book |
         #If there are multiple copies, this only needs to return one
         #This sorts by due date. Available copies will have a nil due_date and come first.
         #Otherwise the earliest due copy will be first
-        copy = book.book_copy.by_due_date.first  
+        copy = book.book_copies.by_due_date.first  
         copy_status = copy.available? ? "Available" : "Due #{copy.due_date}"
         formatted_booklist << { title: book.title, status: copy_status }
       end

@@ -1,4 +1,9 @@
+include Devise::Controllers::Helpers
+
+
 class Api::V1::BookCopiesController < ApplicationController
+  before_action :authenticate_user!
+
   rescue_from ActionController::ParameterMissing, with: :parameter_missing
   rescue_from ActiveRecord::RecordInvalid, with: :record_invalid
   rescue_from ActiveRecord::ActiveRecordError, with: :general_error
@@ -8,7 +13,7 @@ class Api::V1::BookCopiesController < ApplicationController
   before_action :find_borrower
   
   def checkout
-    current_date = DateTime.now
+    current_date = DateTime.now.beginning_of_day
     next_week = current_date + 1.week 
     
     #Verify borrower has access to book copy's library
@@ -17,9 +22,23 @@ class Api::V1::BookCopiesController < ApplicationController
       return
     end
 
+    #Verify that borrower has no unpaid fees, for any book copies
+    unpaid_fees = false
+    @borrower.borrower_records.each do | borrower_record |
+      if borrower_record.fees.any?
+        unpaid_fees = true
+        break
+      end
+    end
+
+    if unpaid_fees
+      render json: { error: 'Please see a librarian. The borrower has unpaid fees.' }, status: :unprocessable_entity
+      return
+    end
+    
     #Find any existing borrower record for this book copy
     borrower_records = BorrowerRecord.where(book_copy_id: @book_copy.id, status: "borrowing", borrower_id: @borrower.id )
-
+    
     if borrower_records.any?
       render json: { error: 'Please see a librarian. There is a problem with this borrower record.' }, status: :unprocessable_entity
     else

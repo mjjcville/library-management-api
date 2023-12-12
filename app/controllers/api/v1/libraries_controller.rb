@@ -1,6 +1,9 @@
 # api/v1/libraries_controller.rb
+include Devise::Controllers::Helpers
 
 class Api::V1::LibrariesController < ApplicationController
+  before_action :authenticate_user!
+  
   rescue_from ActionController::ParameterMissing, with: :parameter_missing
   rescue_from ActiveRecord::RecordNotFound, with: :record_not_found
 
