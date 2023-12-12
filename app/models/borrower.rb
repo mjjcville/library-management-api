@@ -1,7 +1,7 @@
 class Borrower < ApplicationRecord
   belongs_to :library
-  belongs_to :user
-  has_many :checkout_activity
+  belongs_to :library_user
+  has_many :borrower_records
 
   validates :join_date, presence: true
 
